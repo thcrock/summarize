@@ -16,10 +16,10 @@
 
 void Init_summarize() {
  VALUE rb_mOts = rb_define_module("Summarize");
- rb_define_module_function(rb_mOts, "summarize", summarize, 4);
+ rb_define_module_function(rb_mOts, "summarize", summarize, 5);
 }
 
-static VALUE summarize(const VALUE self, volatile VALUE rb_str, volatile VALUE rb_dict_file, const VALUE rb_ratio, const VALUE rb_topics) {
+static VALUE summarize(const VALUE self, volatile VALUE rb_str, volatile VALUE rb_dict_file, const VALUE rb_ratio, const VALUE rb_topics, const VALUE rb_sections) {
   #ifdef HAVE_RUBY_ENCODING_H
     int enc = rb_enc_find_index("UTF-8");
   #endif
@@ -34,6 +34,7 @@ static VALUE summarize(const VALUE self, volatile VALUE rb_str, volatile VALUE r
   VALUE summary;
   VALUE topics;
   VALUE result;
+  VALUE sections;
 
   if (!ots_load_xml_dictionary(doc, dictionary_file)) {
     ots_free_article(doc);
@@ -47,6 +48,12 @@ static VALUE summarize(const VALUE self, volatile VALUE rb_str, volatile VALUE r
 
   summary = rb_str_new2(ots_get_doc_text(doc, &result_len));
   topics = rb_str_new2((const char *)doc->title);
+  sections = rb_ary_new();
+  GList *li;
+  for (li = (GList *) ots_get_doc_sections(doc); li != NULL; li = li->next) {
+    VALUE section = rb_str_new2(li->data);
+    rb_ary_push(sections, section);
+  }
 
   #ifdef HAVE_RUBY_ENCODING_H
     rb_enc_associate_index(summary, enc);
@@ -60,6 +67,8 @@ static VALUE summarize(const VALUE self, volatile VALUE rb_str, volatile VALUE r
     rb_ary_push(result, summary);
     rb_ary_push(result, topics);
     return result;
+  } else if (rb_sections == Qtrue) {
+    return sections;
   } else {
     return summary;
   }

@@ -56,7 +56,8 @@ module Summarize
     default_options = {
       :ratio => 25,      # percentage
       :language => 'en', # ISO 639-1 code
-      :topics => false
+      :topics => false,
+      :sections => false
     }
 
     options = default_options.merge(options.symbolize_keys)
@@ -68,7 +69,7 @@ module Summarize
       dict_file = File.join(File.expand_path(File.dirname(__FILE__)), "../ext/summarize/dic/#{options[:language]}")
     end
 
-    return [dict_file, options[:ratio], options[:topics]]
+    return [dict_file, options[:ratio], options[:topics], options[:sections]]
   end
 
 end
@@ -96,8 +97,8 @@ class String
   # A string summary OR an array of content and topics
   #
   def summarize(options = {})
-    dict_file, ratio, topics = Summarize.parse_options(options)
-    String.send(:summarize, self, dict_file, ratio, topics)
+    dict_file, ratio, topics, sections = Summarize.parse_options(options)
+    String.send(:summarize, self, dict_file, ratio, topics, sections)
   end
 
 end

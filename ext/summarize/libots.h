@@ -122,6 +122,8 @@ unsigned char *ots_get_doc_HTML (const OtsArticle * Doc, size_t * out_len);
 void ots_print_doc (FILE * stream, const OtsArticle * Doc);
 unsigned char *ots_get_doc_text (const OtsArticle * Doc, size_t * out_len);
 
+/*SECTIONS output*/
+GList * ots_get_doc_sections (const OtsArticle * Doc);
 
 /*Plugin writing*/
 unsigned char* ots_get_line_text (const OtsSentence *aLine, gboolean only_if_selected, size_t *out_size);

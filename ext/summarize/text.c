@@ -88,6 +88,42 @@ ots_get_doc_text (const OtsArticle * Doc, size_t * out_len)
   return utf8_data;
 }
 
+GList *
+ots_get_doc_sections (const OtsArticle * Doc)
+{
+  GList *li;
+  GList *sections;
+  GString *current_section;
+  unsigned char *utf8_data;
+  size_t line_len = 0;
+  gboolean previous_line_selected = FALSE;
+
+  sections = NULL;
+  current_section = g_string_new(NULL);
+  for (li = (GList *) Doc->lines; li != NULL; li = li->next) {
+    utf8_data = ots_get_line_text ((OtsSentence *) li->data, TRUE, &line_len);
+    if (line_len) {
+      if (! previous_line_selected) {
+        sections = g_list_append(sections, current_section->str);
+        g_string_free(current_section, FALSE);
+        current_section = g_string_new(NULL);
+      }
+      g_string_append_len(current_section, utf8_data, line_len);
+      previous_line_selected = TRUE;
+    } else {
+      previous_line_selected = FALSE;
+    }
+    g_free (utf8_data);
+  }
+  if( current_section != NULL) {
+    sections = g_list_append(sections, current_section->str);
+  }
+
+  g_string_free(current_section, FALSE);
+
+  return sections;
+}
+
 void
 ots_print_doc (FILE * stream, const OtsArticle * Doc)
 {
